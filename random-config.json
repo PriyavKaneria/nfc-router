@@ -1,0 +1,28 @@
+{
+  "mode": "random_no_repeat",
+  "stateStore": "local",
+  "storageKeyPrefix": "priyav-nfc-router-v2",
+  "campaignParams": {
+    "utm_source": "nfc",
+    "utm_medium": "tap",
+    "utm_campaign": "priyav-card"
+  },
+  "destinations": [
+    { "url": "https://priyavkaneria.com", "weight": 3 },
+    { "url": "https://projects.priyavkaneria.com", "weight": 2 },
+    { "url": "https://interesume.priyavkaneria.com", "weight": 2 },
+    { "url": "https://index.priyavkaneria.com", "weight": 2 },
+    { "url": "https://priyavkaneria.com/#blog", "weight": 2 },
+    { "url": "https://x.priyavkaneria.com", "weight": 2 },
+    { "url": "https://pong.priyavkaneria.com", "weight": 1 },
+    { "url": "https://maze.priyavkaneria.com", "weight": 1 },
+    { "url": "https://output.priyavkaneria.com", "weight": 1 },
+    { "url": "https://locallock.priyavkaneria.com", "weight": 1 },
+    { "url": "https://bolobhai.in", "weight": 1 },
+    { "url": "https://fancy.priyavkaneria.com", "weight": 1 },
+    { "url": "https://gol.priyavkaneria.com", "weight": 1 },
+    { "url": "https://spacetime.priyavkaneria.com", "weight": 1 },
+    { "url": "https://hiddenmotion.priyavkaneria.com", "weight": 1 },
+    { "url": "https://chordwalk.priyavkaneria.com", "weight": 1 }
+  ]
+}
