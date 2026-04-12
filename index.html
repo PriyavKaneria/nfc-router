@@ -7,15 +7,72 @@
     <script defer src="https://umami-sable-xi.vercel.app/script.js" data-website-id="eff0ce71-81c3-44d5-a998-d2943dd00aa5"></script>
   </head>
   <body>
-    <p id="status">Routing...</p>
+    <p id="status">Loading...</p>
     <script>
       (async function () {
         const statusEl = document.getElementById('status');
         const params = new URLSearchParams(window.location.search);
+        const statusMessages = [
+          'Wait for it',
+          'You are not ready for this',
+          'That guy is crazy',
+          'Buckle up',
+          'Hold tight',
+          'Fasten your seatbelt',
+          'Here we go',
+          'Strap in',
+          "Don't blink",
+          'Eyes forward',
+          'Stand by',
+          'Brace yourself',
+          'In transit',
+          'On your way',
+          'Hang tight',
+          'Almost there',
+          'Loading you up',
+          'Watch this',
+          'Pay attention',
+          'Stay with me',
+          'This is the part where...',
+          "You didn't see this coming",
+          'Trust the process',
+          "We're moving",
+          'Off you go',
+          'Launching in 3... 2... 1...',
+          "Don't look down",
+          'No turning back now',
+          'The magic is happening',
+          "Something's cooking",
+          'Plot twist incoming',
+          'Surprise incoming',
+          'Hold my beer',
+          "You're gonna love this",
+          "Don't panic",
+          "It's happening",
+          'Look alive',
+          'Eyes on the prize',
+          'Gear up',
+          'Level loading',
+          'Prepare yourself',
+          'This might tickle',
+          'Mind the gap',
+          'One moment of your life',
+          "This one's for you",
+          'Incoming',
+          'Keep your hands inside the ride',
+          'The universe is rearranging',
+          'Science is working',
+          'Magic in progress',
+          'Calculating destiny',
+          'Your future is buffering',
+          'Sit down for this one',
+        ];
 
         const setStatus = (text) => {
           if (statusEl) statusEl.textContent = text;
         };
+
+        const pickRandom = (items) => items[Math.floor(Math.random() * items.length)];
 
         const withAbsoluteUrl = (url) => new URL(url, window.location.href).toString();
 
@@ -99,6 +156,8 @@
         };
 
         const preview = params.get('preview') === '1';
+
+        setStatus(pickRandom(statusMessages));
 
         try {
           const response = await fetch('./router-config.json', { cache: 'no-store' });
