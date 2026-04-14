@@ -1,42 +1,69 @@
-# NFC Router (static)
+# NFC Router
 
-Super-simple static router for NFC scans.
+Static NFC landing page with a tiny Cloudflare control plane.
 
 ## How it works
 
-- Host `index.html` and `router-config.json` on your domain (example: `id.priyavkaneria.com`).
-- Each visit chooses one destination and immediately redirects.
-- State is stored in browser storage, so the same browser can progress through a sequence or random cycle.
+- Host the `site/` directory on Cloudflare Pages.
+- The page calls `/api/resolve` on every visit.
+- Cloudflare Functions + D1 decide the next redirect, so behavior is shared across all visitors instead of being tied to one browser.
+- The Expo app updates `/api/config`, which resets the server-side state automatically.
 
 ## Config
 
-Edit `router-config.json`:
+Config shape:
 
 - `mode`
-  - `sequential`: A -> B -> C ... then always last destination.
-  - `random_no_repeat`: randomized cycle with no repeats until exhausted, then reshuffle/reset.
+  - `sequential`: A -> B -> C ... then hold on the last destination.
+  - `random_no_repeat`: randomized weighted cycle with no repeats until exhausted, then reshuffle.
+  - `karma`: pauses redirects and shows a message.
 - `stateStore`
-  - `local` (default): persists across browser restarts.
-  - `session`: resets when tab/session is closed.
+  - kept for backward compatibility with the old local fallback config format.
 - `storageKeyPrefix`: namespace to isolate versions/configs.
+- `karmaMessage`: text shown when `mode` is `karma`.
 - `campaignParams`: query params appended to every destination URL (`utm_*` etc).
 - `destinations`:
   - simple mode: `"https://example.com"`
   - weighted mode: `{ "url": "https://example.com", "weight": 3 }`
   - weights are mainly useful in `random_no_repeat`; higher weight appears more times in each full cycle.
 
-## Admin URLs
+## Cloudflare setup
 
-- `/?preview=1` => show next destination without redirecting.
-- `/?reset=1` => clear router state keys, then continue normally.
-- `/?reset=1&preview=1` => clear state and do not redirect.
+1. Create a Cloudflare Pages project for this repo.
+2. Create one D1 database.
+3. Add the `ADMIN_TOKEN` secret.
+4. Deploy with `wrangler` using `site/` as the Pages output directory.
+5. Point your NFC card at the deployed root URL.
+
+The Functions auto-create the required tables on first use, so the D1 binding is the only mandatory storage setup.
+
+## API
+
+- `GET /api/config`
+  - returns the current config
+- `PUT /api/config`
+  - requires `Authorization: Bearer <ADMIN_TOKEN>`
+  - saves config and resets routing state
+- `GET /api/resolve`
+  - returns the next redirect target
+- `GET /api/resolve?preview=1`
+  - returns the next redirect target without consuming it
+- `GET /api/resolve?reset=1&preview=1`
+  - requires admin auth
+  - resets state and shows the next destination without consuming it
+
+## Mobile app
+
+An Expo app lives in `mobile/`.
+
+- Page 1: big mode buttons `Destiny`, `Nature`, `Karma`
+- Page 2: swipe right from the home screen to edit sites, weights, campaign params, API URL, and admin token
+- Save pushes config to `/api/config`
 
 ## Local quick check
 
 ```bash
-python -m http.server 8080
-curl -i "http://127.0.0.1:8080/?preview=1"
-curl -i "http://127.0.0.1:8080/?reset=1&preview=1"
+wrangler pages dev
 ```
 
-Note: redirect logic is JavaScript-driven, so `curl` validates delivery of the page/status text, not browser storage behavior.
+The Pages output directory is now `site/`, and the static page expects `/api/resolve` to exist.

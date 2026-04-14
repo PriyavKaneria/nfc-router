@@ -1,0 +1,7 @@
+mobile/node_modules/
+mobile/.expo/
+mobile/dist/
+mobile/web-build/
+.wrangler/
+.DS_Store
+.codex/PROGRESS.md

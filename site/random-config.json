@@ -1,7 +1,8 @@
 {
-  "mode": "sequential",
+  "mode": "random_no_repeat",
   "stateStore": "local",
   "storageKeyPrefix": "priyav-nfc-router-v2",
+  "karmaMessage": "Karma mode is parked for now. Come back soon.",
   "campaignParams": {
     "utm_source": "nfc",
     "utm_medium": "tap",

@@ -1,0 +1,19 @@
+{
+  "mode": "sequential",
+  "stateStore": "local",
+  "storageKeyPrefix": "priyav-nfc-router-v2",
+  "karmaMessage": "Karma mode is parked for now. Come back soon.",
+  "campaignParams": {
+    "utm_source": "nfc",
+    "utm_medium": "tap",
+    "utm_campaign": "priyav-card"
+  },
+  "destinations": [
+    { "url": "https://priyavkaneria.com", "weight": 3 },
+    { "url": "https://projects.priyavkaneria.com", "weight": 2 },
+    { "url": "https://interesume.priyavkaneria.com", "weight": 2 },
+    { "url": "https://index.priyavkaneria.com", "weight": 2 },
+    { "url": "https://priyavkaneria.com/#blog", "weight": 2 },
+    { "url": "https://x.priyavkaneria.com", "weight": 2 }
+  ]
+}
