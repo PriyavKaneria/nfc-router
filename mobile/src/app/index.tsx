@@ -1,9 +1,7 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -38,14 +36,10 @@ type RouterConfig = {
   destinations: Destination[];
 };
 
-type ConnectionSettings = {
-  apiBaseUrl: string;
-  adminToken: string;
-};
-
-const STORAGE_KEY = 'nfc-router-controller:connection';
 const HOME_PAGE = 0;
 const CONFIG_PAGE = 1;
+const API_BASE_URL = 'https://id.priyavkaneria.com';
+const ADMIN_TOKEN = '78e21951e245e233a6345ae4e3d0b2c7d61212b6862516f0c4030d9944d2cd6b';
 
 const defaultConfig: RouterConfig = {
   mode: 'sequential',
@@ -61,11 +55,6 @@ const defaultConfig: RouterConfig = {
     { url: 'https://priyavkaneria.com', weight: 3 },
     { url: 'https://projects.priyavkaneria.com', weight: 2 },
   ],
-};
-
-const defaultConnection: ConnectionSettings = {
-  apiBaseUrl: 'https://id.priyavkaneria.com',
-  adminToken: '',
 };
 
 const modeCards: Array<{
@@ -127,38 +116,16 @@ export default function ControllerScreen() {
   const pagerRef = useRef<ScrollView>(null);
   const [pageIndex, setPageIndex] = useState(HOME_PAGE);
   const [isBusy, setIsBusy] = useState(false);
-  const [status, setStatus] = useState('Add your live URL and token, then pull the config.');
-  const [connection, setConnection] = useState<ConnectionSettings>(defaultConnection);
+  const [status, setStatus] = useState(`Connected to ${API_BASE_URL}. Pull the live config when you're ready.`);
   const [draft, setDraft] = useState<RouterConfig>(defaultConfig);
-
-  useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY)
-      .then((value) => {
-        if (!value) return;
-        const parsed = JSON.parse(value) as Partial<ConnectionSettings>;
-        setConnection({
-          apiBaseUrl:
-            typeof parsed.apiBaseUrl === 'string' ? parsed.apiBaseUrl : defaultConnection.apiBaseUrl,
-          adminToken: typeof parsed.adminToken === 'string' ? parsed.adminToken : '',
-        });
-      })
-      .catch(() => {
-        setStatus('Could not restore saved connection settings.');
-      });
-  }, []);
 
   useEffect(() => {
     if (!width) return;
     pagerRef.current?.scrollTo({ x: pageIndex * width, animated: false });
   }, [pageIndex, width]);
 
-  const persistConnection = async (next: ConnectionSettings) => {
-    setConnection(next);
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-  };
-
   const buildApiUrl = (path: string) => {
-    const baseUrl = sanitizeBaseUrl(connection.apiBaseUrl);
+    const baseUrl = sanitizeBaseUrl(API_BASE_URL);
     if (!baseUrl) throw new Error('Add your API base URL first.');
     return `${baseUrl}${path}`;
   };
@@ -187,7 +154,6 @@ export default function ControllerScreen() {
       const payload = await parseApiResponse(response);
       setDraft(normalizeConfig(payload.config));
       setStatus(`Live config loaded from ${payload.source === 'd1' ? 'D1' : 'the built-in default'}.`);
-      await persistConnection(connection);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Could not load config.');
     } finally {
@@ -196,11 +162,6 @@ export default function ControllerScreen() {
   };
 
   const saveConfig = async () => {
-    if (!connection.adminToken.trim()) {
-      Alert.alert('Admin token needed', 'Add the Cloudflare ADMIN_TOKEN before saving live changes.');
-      return;
-    }
-
     setIsBusy(true);
     try {
       const payloadToSave = normalizeConfig(draft);
@@ -208,14 +169,13 @@ export default function ControllerScreen() {
         method: 'PUT',
         headers: {
           'content-type': 'application/json',
-          authorization: `Bearer ${connection.adminToken.trim()}`,
+          authorization: `Bearer ${ADMIN_TOKEN}`,
         },
         body: JSON.stringify(payloadToSave),
       });
       const payload = await parseApiResponse(response);
       setDraft(normalizeConfig(payload.config));
       setStatus('Live config saved. Router state was reset so changes apply from the next scan.');
-      await persistConnection(connection);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Could not save config.');
     } finally {
@@ -233,7 +193,6 @@ export default function ControllerScreen() {
       } else {
         setStatus(`Next tap points to ${payload.redirectUrl}`);
       }
-      await persistConnection(connection);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Could not preview the next destination.');
     } finally {
@@ -242,16 +201,11 @@ export default function ControllerScreen() {
   };
 
   const resetFlow = async () => {
-    if (!connection.adminToken.trim()) {
-      Alert.alert('Admin token needed', 'Add the Cloudflare ADMIN_TOKEN before resetting the live flow.');
-      return;
-    }
-
     setIsBusy(true);
     try {
       const response = await fetch(buildApiUrl('/api/resolve?reset=1&preview=1'), {
         headers: {
-          authorization: `Bearer ${connection.adminToken.trim()}`,
+          authorization: `Bearer ${ADMIN_TOKEN}`,
         },
       });
       const payload = await parseApiResponse(response);
@@ -260,7 +214,6 @@ export default function ControllerScreen() {
       } else {
         setStatus(`Live flow reset. Next tap points to ${payload.redirectUrl}`);
       }
-      await persistConnection(connection);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Could not reset the live flow.');
     } finally {
@@ -392,26 +345,8 @@ export default function ControllerScreen() {
               </View>
 
               <View style={styles.panel}>
-                <Text style={styles.sectionTitle}>Connection</Text>
-                <TextInput
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  onChangeText={(value) => setConnection((current) => ({ ...current, apiBaseUrl: value }))}
-                  placeholder="https://your-domain.com"
-                  placeholderTextColor="#8d8d7f"
-                  style={styles.input}
-                  value={connection.apiBaseUrl}
-                />
-                <TextInput
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  onChangeText={(value) => setConnection((current) => ({ ...current, adminToken: value }))}
-                  placeholder="ADMIN_TOKEN"
-                  placeholderTextColor="#8d8d7f"
-                  secureTextEntry
-                  style={styles.input}
-                  value={connection.adminToken}
-                />
+                <Text style={styles.sectionTitle}>Live router</Text>
+                <Text style={styles.liveEndpoint}>{API_BASE_URL}</Text>
                 <View style={styles.row}>
                   <Pressable onPress={loadConfig} style={styles.smallButton}>
                     <Text style={styles.smallButtonText}>Pull live</Text>
@@ -668,6 +603,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
     marginTop: 10,
+  },
+  liveEndpoint: {
+    color: '#d8eef5',
+    fontSize: 16,
+    marginBottom: 6,
   },
   panel: {
     backgroundColor: '#0b2232',

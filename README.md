@@ -57,7 +57,7 @@ The Functions auto-create the required tables on first use, so the D1 binding is
 An Expo app lives in `mobile/`.
 
 - Page 1: big mode buttons `Destiny`, `Nature`, `Karma`
-- Page 2: swipe right from the home screen to edit sites, weights, campaign params, API URL, and admin token
+- Page 2: swipe right from the home screen to edit sites, weights, campaign params, and mode-related copy
 - Save pushes config to `/api/config`
 
 ## Local quick check

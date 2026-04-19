@@ -8,8 +8,8 @@ Simple Expo controller for the NFC router.
   - `Destiny` -> `sequential`
   - `Nature` -> `random_no_repeat`
   - `Karma` -> `karma`
-- Swipe right from the home screen to open the site and connection editor
-- Edit destinations, weights, campaign params, `karmaMessage`, API base URL, and admin token
+- Swipe right from the home screen to open the site editor
+- Edit destinations, weights, campaign params, and `karmaMessage`
 - Pull the live config from Cloudflare and push updates back to `/api/config`
 - Preview the next redirect or reset the live flow
 
@@ -23,7 +23,4 @@ npm start
 
 Then open it in Expo Go, iOS Simulator, Android Emulator, or the web preview.
 
-## Required backend values
-
-- `apiBaseUrl`: your deployed Pages domain, for example `https://id.example.com`
-- `adminToken`: must match the `ADMIN_TOKEN` Cloudflare environment variable
+The app is currently wired directly to the live Cloudflare Pages deployment and uses a built-in admin token.
